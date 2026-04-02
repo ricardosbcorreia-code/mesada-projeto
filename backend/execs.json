@@ -1,0 +1,44 @@
+[
+  {
+    "id": "729667c7-b4c8-4501-ab20-78302da4ef30",
+    "task": "Tarefa Semanal Teste",
+    "child": "🦁 Arthur",
+    "status": "pending",
+    "date": "2026-03-19T00:00:00.000Z"
+  },
+  {
+    "id": "4a80f209-1197-45d8-bf4b-11e74f4834b0",
+    "task": "Obg 3",
+    "child": "🦊 Arthur Nunes",
+    "status": "approved",
+    "date": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "id": "68687430-98e6-4a81-9d14-ceacac762a48",
+    "task": "Obg 2",
+    "child": "🦊 Arthur Nunes",
+    "status": "approved",
+    "date": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "id": "4e269854-7765-40a6-a4e9-02c44e09a398",
+    "task": "Obg 1",
+    "child": "🦊 Arthur Nunes",
+    "status": "approved",
+    "date": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "id": "c47eba28-f994-4645-b740-90b5e75c0142",
+    "task": "Arrumar Quarto",
+    "child": "🦁 Arthur",
+    "status": "completed",
+    "date": "2026-03-31T00:00:00.000Z"
+  },
+  {
+    "id": "0603aa72-a850-465c-94e3-e7ebcaaf4da3",
+    "task": "Ler Livro",
+    "child": "🦁 Arthur",
+    "status": "completed",
+    "date": "2026-03-31T00:00:00.000Z"
+  }
+]
