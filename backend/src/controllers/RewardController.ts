@@ -122,8 +122,8 @@ export const redeemReward = async (req: AuthenticatedRequest, res: Response): Pr
         where: { reward_id: reward.id, child_id: childId }
       });
       if (pastRedemptions >= reward.max_redeems) {
-         res.status(400).json({ error: 'Limit reached for this reward' });
-         return;
+        res.status(400).json({ error: 'Limit reached for this reward' });
+        return;
       }
     }
 
@@ -142,7 +142,11 @@ export const redeemReward = async (req: AuthenticatedRequest, res: Response): Pr
       select: { expo_push_token: true }
     });
     if (parent?.expo_push_token) {
-      await sendPushNotification(parent.expo_push_token, 'Prêmio Resgatado! 🎁', `${child.name} deseja resgatar o prêmio: ${reward.name}. Aprove!`);
+      await sendPushNotification(
+        parent.expo_push_token,
+        'Prêmio Resgatado! 🎁',
+        `${child.name} deseja resgatar o prêmio: ${reward.name}. Aprove!`
+      );
     }
 
     res.status(201).json(redemption);
@@ -168,7 +172,7 @@ export const updateRedemptionStatus = async (req: AuthenticatedRequest, res: Res
       return;
     }
 
-    const redemption: any = await prisma.rewardRedemption.findUnique({
+    const redemption = await prisma.rewardRedemption.findUnique({
       where: { id: redemptionId },
       include: { reward: true, child: true }
     });
@@ -184,10 +188,12 @@ export const updateRedemptionStatus = async (req: AuthenticatedRequest, res: Res
     });
 
     // Notify Child
-    if (redemption.child && redemption.child.expo_push_token) {
-       const title = status === 'approved' ? 'Prêmio Liberado! 🎉' : 'Resgate Cancelado ❌';
-       const body = status === 'approved' ? `Seu prêmio "${redemption.reward.name}" foi aprovado!` : `O resgate de "${redemption.reward.name}" foi negado.`;
-       await sendPushNotification(redemption.child.expo_push_token, title, body);
+    if (redemption.child?.expo_push_token) {
+      const title = status === 'approved' ? 'Prêmio Liberado! 🎉' : 'Resgate Cancelado ❌';
+      const body = status === 'approved'
+        ? `Seu prêmio "${redemption.reward.name}" foi aprovado!`
+        : `O resgate de "${redemption.reward.name}" foi negado.`;
+      await sendPushNotification(redemption.child.expo_push_token, title, body);
     }
 
     res.json(updated);
@@ -215,4 +221,3 @@ export const getMyRedemptions = async (req: AuthenticatedRequest, res: Response)
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-

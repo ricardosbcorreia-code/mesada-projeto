@@ -1,5 +1,5 @@
 import express from 'express';
-import { getRewards, createReward, deleteReward, redeemReward, updateRedemptionStatus, getMyRedemptions } from '../controllers/RewardController';
+import { getRewards, createReward, deleteReward, redeemReward, updateRedemptionStatus, getMyRedemptions } from '../controllers/rewardController';
 import { authenticate } from '../middlewares/auth';
 
 const router = express.Router();
