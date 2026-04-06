@@ -89,7 +89,16 @@ export const deleteReward = async (req: AuthenticatedRequest, res: Response): Pr
       return;
     }
 
-    await prisma.reward.delete({ where: { id: rewardId } });
+    // Use transaction to delete associated redemptions first
+    await prisma.$transaction([
+      prisma.rewardRedemption.deleteMany({
+        where: { reward_id: rewardId }
+      }),
+      prisma.reward.delete({
+        where: { id: rewardId }
+      })
+    ]);
+
     res.json({ success: true });
   } catch (error) {
     console.error(error);
