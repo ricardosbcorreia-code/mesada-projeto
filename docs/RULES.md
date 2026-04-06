@@ -7,6 +7,7 @@ Este documento descreve todas as regras de negócio do sistema.
 ## 1. Usuários e Papéis
 
 ### Pai/Mãe (Parent)
+
 - Cria conta com email e senha
 - Cadastra filhos com nome e PIN
 - Cria e gerencia tarefas
@@ -17,6 +18,7 @@ Este documento descreve todas as regras de negócio do sistema.
 - Visualiza relatórios mensais
 
 ### Filho (Child)
+
 - Acessa o app com PIN de 4 dígitos
 - Visualiza suas tarefas do dia
 - Marca tarefas como concluídas
@@ -28,6 +30,7 @@ Este documento descreve todas as regras de negócio do sistema.
 ## 2. Sistema de Tarefas
 
 ### Tipos de Tarefa
+
 | Tipo | Efeito no XP | Descrição |
 |---|---|---|
 | `mandatory` | Positivo (+) | Tarefas obrigatórias |
@@ -35,11 +38,13 @@ Este documento descreve todas as regras de negócio do sistema.
 | `penalty` | Negativo (-) | Penalidades por comportamento |
 
 ### Valor da Tarefa
+
 - Cada tarefa tem um valor monetário (`value`) em Reais
 - O XP ganho é calculado como: `value × 10`
 - Exemplo: tarefa de R$ 5,00 = 50 XP
 
 ### Recorrência
+
 | Tipo | Descrição |
 |---|---|
 | `daily` | Repete todos os dias |
@@ -48,6 +53,7 @@ Este documento descreve todas as regras de negócio do sistema.
 | `yearly` | Repete anualmente |
 
 ### Subtarefas
+
 - Uma tarefa pode ter múltiplas subtarefas (checklist)
 - A criança precisa marcar todos os itens para completar a tarefa principal
 
@@ -66,6 +72,7 @@ approved → XP creditado / rejected → sem efeito
 ```
 
 ### Status de Execução
+
 | Status | Descrição |
 |---|---|
 | `pending` | Aguardando aprovação do pai |
@@ -78,10 +85,12 @@ approved → XP creditado / rejected → sem efeito
 ## 4. Sistema de XP e Níveis
 
 ### Cálculo de XP
+
 - XP é acumulado apenas a partir de tarefas com status `approved`
 - Fórmula: `XP Total = Σ (valor_tarefa × 10)` para todas as tarefas aprovadas no mês
 
 ### Níveis
+
 | Nível | Nome | XP Mínimo |
 |---|---|---|
 | 1 | Iniciante | 0 |
@@ -95,6 +104,7 @@ approved → XP creditado / rejected → sem efeito
 ## 5. Cálculo da Mesada
 
 ### Fórmula
+
 ```
 Mesada Final = Base + Bônus - Penalidades
 ```
@@ -104,6 +114,7 @@ Mesada Final = Base + Bônus - Penalidades
 - **Penalidades:** soma dos valores de tarefas `penalty` aprovadas no mês
 
 ### Relatório Mensal
+
 - Gerado sob demanda pelo pai para qualquer mês/ano
 - Contém: XP ganho, bônus, penalidades e mesada final calculada
 - Histórico disponível por filho
@@ -113,16 +124,19 @@ Mesada Final = Base + Bônus - Penalidades
 ## 6. Sistema de Recompensas (Loja)
 
 ### Recompensas
+
 - Criadas pelo pai com nome, descrição e custo em XP
 - Podem ter limite de resgates (`max_redeems`) por filho
 - Visíveis pela criança na Loja
 
 ### XP Disponível para Resgate
+
 ```
 XP Disponível = XP Total Acumulado - XP já Gasto em Resgates (aprovados)
 ```
 
 ### Fluxo de Resgate
+
 ```
 Criança solicita resgate
         ↓
@@ -134,6 +148,7 @@ approved → XP debitado / rejected → XP devolvido
 ```
 
 ### Limites
+
 - Uma criança pode solicitar uma recompensa mesmo sem XP suficiente (validação no frontend)
 - O backend impede solicitar se o limite de resgates (`max_redeems`) foi atingido
 

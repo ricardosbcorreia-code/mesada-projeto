@@ -40,7 +40,7 @@ export default function RegisterScreen({ navigation }: Props) {
     setLoading(true);
     try {
       const res = await api.post('/auth/register', { name, email, password });
-      await signIn(res.data.token, res.data.parent, 'parent');
+      await signIn(res.data.accessToken, res.data.refreshToken, res.data.parent, 'parent');
     } catch (e: any) {
       Alert.alert('Erro', e.response?.data?.error || 'Não foi possível criar a conta.');
     } finally {

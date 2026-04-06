@@ -1,7 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-for-mvp';
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error('FATAL: JWT_SECRET environment variable is not defined.');
+}
 
 export interface AuthenticatedRequest extends Request {
   user?: {

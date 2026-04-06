@@ -4,18 +4,22 @@ import jwt from 'jsonwebtoken';
 import prisma from '../config/prisma';
 import { AuthenticatedRequest } from '../middlewares/auth';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-for-mvp';
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
+
+if (!JWT_SECRET || !JWT_REFRESH_SECRET) {
+  throw new Error('FATAL: JWT_SECRET or JWT_REFRESH_SECRET environment variable is not defined.');
+}
+
+const generateTokens = (payload: object) => {
+  const accessToken = jwt.sign(payload, JWT_SECRET as string, { expiresIn: '15m' });
+  const refreshToken = jwt.sign(payload, JWT_REFRESH_SECRET as string, { expiresIn: '30d' });
+  return { accessToken, refreshToken };
+};
 
 export const registerParent = async (req: Request, res: Response): Promise<void> => {
   try {
     const { name, email, password } = req.body;
-    console.log(`[Register] Attempt for email: ${email}`);
-
-    if (!name || !email || !password) {
-      console.log('[Register] Missing fields');
-      res.status(400).json({ error: 'Name, email, and password are required' });
-      return;
-    }
 
     const existingUser = await prisma.parent.findUnique({ where: { email } });
     if (existingUser) {
@@ -31,15 +35,15 @@ export const registerParent = async (req: Request, res: Response): Promise<void>
         email,
         password_hash,
       },
-      select: { id: true, name: true, email: true }, // Don't return hash
+      select: { id: true, name: true, email: true },
     });
 
-    const token = jwt.sign({ id: parent.id, role: 'parent' }, JWT_SECRET, { expiresIn: '7d' });
+    const tokens = generateTokens({ id: parent.id, role: 'parent' });
 
-    res.status(201).json({ parent, token });
+    res.status(201).json({ parent, ...tokens });
   } catch (error) {
     console.error('[Register] ERROR:', error);
-    res.status(500).json({ error: 'Internal Server Error', details: error instanceof Error ? error.message : String(error) });
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -59,9 +63,9 @@ export const loginParent = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    const token = jwt.sign({ id: parent.id, role: 'parent' }, JWT_SECRET, { expiresIn: '7d' });
+    const tokens = generateTokens({ id: parent.id, role: 'parent' });
 
-    res.json({ parent: { id: parent.id, name: parent.name, email: parent.email }, token });
+    res.json({ parent: { id: parent.id, name: parent.name, email: parent.email }, ...tokens });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -71,11 +75,6 @@ export const loginParent = async (req: Request, res: Response): Promise<void> =>
 export const loginChild = async (req: Request, res: Response): Promise<void> => {
   try {
     const { parentEmail, pin } = req.body;
-
-    if (!parentEmail || !pin) {
-      res.status(400).json({ error: 'Parent email and PIN are required' });
-      return;
-    }
 
     const parent = await prisma.parent.findUnique({ 
       where: { email: parentEmail },
@@ -94,9 +93,31 @@ export const loginChild = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
-    const token = jwt.sign({ id: child.id, role: 'child', parent_id: child.parent_id }, JWT_SECRET, { expiresIn: '30d' });
+    // Children stay logged in for 30d, but we still give a refresh token
+    const tokens = generateTokens({ id: child.id, role: 'child', parent_id: child.parent_id });
 
-    res.json({ child: { id: child.id, name: child.name, base_allowance: child.base_allowance }, token });
+    res.json({ child: { id: child.id, name: child.name, base_allowance: child.base_allowance }, ...tokens });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+export const refreshToken = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { refreshToken } = req.body;
+
+    try {
+      const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET as string) as any;
+      
+      // Remove iat and exp from payload to create new one
+      const { iat, exp, ...payload } = decoded;
+      const tokens = generateTokens(payload);
+
+      res.json(tokens);
+    } catch (err) {
+      res.status(401).json({ error: 'Refresh token inválido ou expirado' });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });

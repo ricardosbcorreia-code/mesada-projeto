@@ -31,14 +31,14 @@ export default function LoginScreen({ navigation }: Props) {
           return;
         }
         const res = await api.post('/auth/login', { email, password });
-        await signIn(res.data.token, res.data.parent, 'parent');
+        await signIn(res.data.accessToken, res.data.refreshToken, res.data.parent, 'parent');
       } else {
         if (!email || !pin || pin.length < 4) {
           Alert.alert('Atenção', 'Insira o e-mail do responsável e seu PIN de 4 dígitos.');
           return;
         }
         const res = await api.post('/auth/child-login', { parentEmail: email, pin });
-        await signIn(res.data.token, res.data.child, 'child');
+        await signIn(res.data.accessToken, res.data.refreshToken, res.data.child, 'child');
       }
     } catch (error: any) {
       const msg = error.response?.data?.error || 'Verifique suas credenciais e tente novamente.';

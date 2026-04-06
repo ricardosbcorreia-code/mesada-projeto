@@ -15,7 +15,7 @@ interface AuthContextData {
   role: UserRole;
   user: UserData | null;
   loading: boolean;
-  signIn: (token: string, userData: UserData, role: UserRole) => Promise<void>;
+  signIn: (accessToken: string, refreshToken: string, userData: UserData, role: UserRole) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -31,8 +31,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const storageUser = await AsyncStorage.getItem('@auth_user');
       const storageRole = await AsyncStorage.getItem('@auth_role');
       const storageToken = await AsyncStorage.getItem('@auth_token');
+      const storageRefreshToken = await AsyncStorage.getItem('@auth_refresh_token');
 
-      if (storageUser && storageRole && storageToken) {
+      if (storageUser && storageRole && storageToken && storageRefreshToken) {
         setUser(JSON.parse(storageUser));
         setRole(storageRole as UserRole);
       }
@@ -42,11 +43,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     loadStorageData();
   }, []);
 
-  const signIn = async (token: string, userData: UserData, userRole: UserRole) => {
+  const signIn = async (accessToken: string, refreshToken: string, userData: UserData, userRole: UserRole) => {
     setUser(userData);
     setRole(userRole);
 
-    await AsyncStorage.setItem('@auth_token', token);
+    await AsyncStorage.setItem('@auth_token', accessToken);
+    await AsyncStorage.setItem('@auth_refresh_token', refreshToken);
     await AsyncStorage.setItem('@auth_user', JSON.stringify(userData));
     if (userRole) {
       await AsyncStorage.setItem('@auth_role', userRole);
@@ -54,7 +56,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
-    await AsyncStorage.clear();
+    await AsyncStorage.multiRemove([
+      '@auth_token',
+      '@auth_refresh_token',
+      '@auth_user',
+      '@auth_role'
+    ]);
     setUser(null);
     setRole(null);
   };

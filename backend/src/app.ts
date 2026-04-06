@@ -14,6 +14,10 @@ import rewardRoutes from './routes/rewardRoutes';
 
 const app: Express = express();
 
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(',') 
+  : ['*'];
+
 // Request logger middleware (FIRST)
 app.use((req: Request, res: Response, next: NextFunction) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
@@ -21,7 +25,17 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: (origin, callback) => {
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (ALLOWED_ORIGINS.indexOf(origin) !== -1 || ALLOWED_ORIGINS.includes('*')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+}));
 app.use(express.json());
 
 // Main Routes
@@ -36,10 +50,28 @@ app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', timestamp: new Date() });
 });
 
-// Basic error handler
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Internal Server Error' });
+// Centralized error handler
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({ error: 'CORS policy: Origin not allowed' });
+  }
+
+  console.error(`[ERROR] ${err.stack || err.message}`);
+  
+  // prisma error for unique constraint
+  if (err.code === 'P2002') {
+    return res.status(409).json({ error: 'Conflict: Unique constraint violation' });
+  }
+
+  const statusCode = err.status || err.statusCode || 500;
+  const message = process.env.NODE_ENV === 'production' && statusCode === 500
+    ? 'Internal Server Error'
+    : err.message || 'Something went wrong';
+
+  res.status(statusCode).json({ 
+    error: message,
+    ...(process.env.NODE_ENV !== 'production' && { stack: err.stack })
+  });
 });
 
 export default app;
