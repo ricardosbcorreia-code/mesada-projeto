@@ -45,3 +45,9 @@ dist/
 build/
 .DS_Store
 Thumbs.db
+
+# Debug/temp scripts
+backend/check*.js
+mobile/errors.txt
+*.log
+log.json

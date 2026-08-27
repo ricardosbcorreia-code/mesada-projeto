@@ -123,24 +123,35 @@ export default function ChildStoreScreen() {
         {rewards.length === 0 && !loading ? (
           <EmptyState emoji="🛍️" title="Loja Vazia" subtitle="Seu responsável ainda não adicionou prêmios." />
         ) : (
-          rewards.map(reward => (
-            <Card key={reward.id} style={styles.rewardCard}>
-              <View style={styles.rewardContent}>
-                <Ionicons name="gift" size={36} color={Colors.xpGold} style={{ marginRight: Spacing.md }} />
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.rewardName}>{reward.name}</Text>
-                  {reward.description ? <Text style={styles.rewardDesc}>{reward.description}</Text> : null}
-                  <Text style={styles.costText}>{reward.cost_in_xp} XP</Text>
+          rewards.map(reward => {
+            const redemptionsCount = history.filter(h => h.reward_id === reward.id && h.status !== 'rejected').length;
+            const isFullyRedeemed = reward.max_redeems !== null && redemptionsCount >= reward.max_redeems;
+            const hasEnoughXp = availableXp >= reward.cost_in_xp;
+
+            return (
+              <Card key={reward.id} style={[styles.rewardCard, isFullyRedeemed ? { opacity: 0.5 } : undefined]}>
+                <View style={styles.rewardContent}>
+                  <Ionicons name="gift" size={36} color={Colors.xpGold} style={{ marginRight: Spacing.md }} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.rewardName, isFullyRedeemed && { textDecorationLine: 'line-through', color: '#888' }]}>{reward.name}</Text>
+                    {reward.description ? <Text style={styles.rewardDesc}>{reward.description}</Text> : null}
+                    <Text style={styles.costText}>{reward.cost_in_xp} XP</Text>
+                    {isFullyRedeemed && (
+                      <Text style={{ color: Colors.danger, fontSize: 12, fontWeight: 'bold', marginTop: 4 }}>
+                        {reward.max_redeems === 1 ? 'Prêmio de resgate único atingido' : `Limite de ${reward.max_redeems} resgates atingido`}
+                      </Text>
+                    )}
+                  </View>
                 </View>
-              </View>
-              <Button 
-                title={availableXp >= reward.cost_in_xp ? "Resgatar" : "Falta XP"} 
-                variant={availableXp >= reward.cost_in_xp ? "primary" : "secondary"}
-                onPress={() => handleRedeem(reward)}
-                disabled={availableXp < reward.cost_in_xp}
-              />
-            </Card>
-          ))
+                <Button 
+                  title={isFullyRedeemed ? "Resgatado" : (hasEnoughXp ? "Resgatar" : "Falta XP")} 
+                  variant={isFullyRedeemed ? "secondary" : (hasEnoughXp ? "primary" : "secondary")}
+                  onPress={() => handleRedeem(reward)}
+                  disabled={isFullyRedeemed || !hasEnoughXp}
+                />
+              </Card>
+            );
+          })
         )}
       </ScrollView>
     </SafeAreaView>
@@ -157,7 +168,7 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 22, fontWeight: '800', color: '#fff' },
   xpBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.xpGold + '20', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, gap: 4 },
   xpText: { color: Colors.xpGold, fontWeight: '800', fontSize: 15 },
-  scroll: { padding: Spacing.md, paddingBottom: Spacing.xxl },
+  scroll: { padding: Spacing.md, paddingBottom: 120 },
   rewardCard: { backgroundColor: '#1F1F3E', marginBottom: Spacing.md, padding: Spacing.md },
   rewardContent: { flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.md },
   rewardName: { fontSize: 18, fontWeight: '800', color: '#fff' },

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, RefreshControl,
-  TouchableOpacity,
+  TouchableOpacity, Platform
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -78,7 +78,14 @@ export default function ChildDashboard() {
   );
 
   const ExpandableGroup = ({ title, items, color }: { title: string; items: any[]; color: string }) => {
-    const [expanded, setExpanded] = useState(true);
+    const hasOpenItems = items.some(ex => ex.status === 'pending' || ex.status === 'completed');
+    const [expanded, setExpanded] = useState(hasOpenItems);
+    
+    // Update local state if the default open requirement changes (e.g., loaded new data)
+    useEffect(() => {
+      setExpanded(hasOpenItems);
+    }, [hasOpenItems]);
+
     if (items.length === 0) return null;
 
     const groupTotal = items.reduce((sum, ex) => {
@@ -224,7 +231,12 @@ export default function ChildDashboard() {
             <Text style={styles.levelText}>Nível {level + 1} · {xp} XP</Text>
           </View>
         </View>
-        <TouchableOpacity onPress={signOut} style={styles.logoutBtn}>
+        <TouchableOpacity 
+          onPress={async () => {
+            await signOut();
+          }} 
+          style={styles.logoutBtn}
+        >
           <Ionicons name="log-out-outline" size={24} color={Colors.textSecondary} />
         </TouchableOpacity>
       </View>
@@ -283,7 +295,7 @@ const styles = StyleSheet.create({
   },
   avatarText: { color: '#fff', fontWeight: '900', fontSize: 18 },
   logoutBtn: { padding: 4 },
-  scroll: { padding: Spacing.md, paddingBottom: 100 },
+  scroll: { padding: Spacing.md, paddingBottom: 120 },
   xpCard: { backgroundColor: '#16213E', marginBottom: Spacing.sm },
   xpRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   xpLabel: { fontSize: 13, fontWeight: '700', color: '#fff' },

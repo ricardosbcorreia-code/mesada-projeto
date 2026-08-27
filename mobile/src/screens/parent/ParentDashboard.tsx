@@ -191,14 +191,13 @@ export default function ParentDashboard({ navigation }: Props) {
           <Text style={styles.greeting}>Olá, {user?.name?.split(' ')[0]} 👋</Text>
           <Text style={styles.subtitle}>Painel do Responsável</Text>
         </View>
-        <TouchableOpacity onPress={() => {
+        <TouchableOpacity onPress={async () => {
           if (Platform.OS === 'web') {
-            signOut();
-            window.location.reload();
+            await signOut();
           } else {
             Alert.alert('Sair', 'Deseja encerrar a sessão?', [
               { text: 'Cancelar', style: 'cancel' },
-              { text: 'Sair', style: 'destructive', onPress: signOut },
+              { text: 'Sair', style: 'destructive', onPress: async () => await signOut() },
             ]);
           }
         }}>
@@ -352,7 +351,7 @@ const styles = StyleSheet.create({
   },
   greeting: { ...Typography.h2 },
   subtitle: { ...Typography.caption, marginTop: 2 },
-  scroll: { padding: Spacing.md, paddingBottom: 100 },
+  scroll: { padding: Spacing.md, paddingBottom: 120 },
   childRow: { marginHorizontal: -Spacing.md, paddingHorizontal: Spacing.md, marginBottom: Spacing.sm },
   childCard: {
     alignItems: 'center', padding: Spacing.sm, marginRight: Spacing.sm,

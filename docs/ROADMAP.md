@@ -43,18 +43,21 @@ Documento de controle de evolução do projeto. Atualizar este arquivo conforme 
 
 ---
 
-## ⬜ Fase 1 — Estabilização (Pós-feedback dos testers)
+## 🔄 Fase 1 — Estabilização (Pós-feedback dos testers)
 
 > Executar após 1–2 semanas de testes com a família.
 
 ### Experiência do Usuário (UX)
 
-- [ ] Implementar "Login Google" (usar Clerk)
-- [ ] Melhorar responsividade das abas (tarefas, loja, perfil) - tirar de trás dos botões de navegação
-- [ ] Incluir exclusão de tarefas no painel de tarefas
-- [ ] Penalidades e bônus apenas uma execução (desabilitar recorrência)
-- [ ] Ajustar prêmios na loja para serem resgatados apenas uma vez
-- [ ] Permitir exclusão de prêmios pelo pai
+- [x] Implementar "Login Google" (migrado de Clerk para Google Auth nativo + JWT próprio)
+- [x] Correção de erro de segurança COOP (Cross-Origin-Opener-Policy) no navegador
+- [x] Sincronização automática de perfil pai (Backend Sync) via Google ID Token
+- [x] Ajuste de Logout assíncrono (Web e Mobile) para encerramento de sessão real
+- [x] Melhorar responsividade das abas (tarefas, loja, perfil) - tirar de trás dos botões de navegação
+- [x] Incluir exclusão de tarefas no painel de tarefas
+- [x] Penalidades e bônus apenas uma execução (desabilitar recorrência)
+- [x] Ajustar prêmios na loja para serem resgatados apenas uma vez
+- [x] Permitir exclusão de prêmios pelo pai
 - [ ] Melhorar responsividade da tela de login (campo de senha ou pin ficam escondidos atrás do teclado do Android)
 - [ ] Data de "lembrete de pagamento" no perfil do Pai para pagamento da mesada
 - [ ] Tela de onboarding para novos usuários
@@ -158,7 +161,7 @@ Documento de controle de evolução do projeto. Atualizar este arquivo conforme 
 | Versão | Data | Descrição |
 |---|---|---|
 | `v1.0.0` | Abr/2026 | MVP production-ready — primeiro deploy com testers |
-| `v1.1.0` | — | _(próximo release — pós feedback fase 1)_ |
+| `v1.1.0` | Ago/2026 | Google Auth nativo, refresh tokens, segurança, limpeza de código |
 
 ---
 
@@ -170,3 +173,8 @@ Documento de controle de evolução do projeto. Atualizar este arquivo conforme 
 | Abr/2026 | Supabase para banco | PostgreSQL gerenciado, generoso no free tier |
 | Abr/2026 | Session Pooler (porta 5432) | Compatível com Prisma (Transaction mode quebra prepared statements) |
 | Abr/2026 | EAS Build para APK | Mais simples que configurar Android SDK local |
+| Abr/2026 | Clerk para Autenticação | Facilidade de Login Social (Google) e Gestão de Sessões segura |
+| Abr/2026 | useOAuth (Clerk) | Escolhido em vez de useSSO para melhor compatibilidade com Expo Web |
+| Abr/2026 | Separação de .env | Segurança: ocultar DATABASE_URL e Secret Keys do código Mobile |
+| Ago/2026 | Migrar de Clerk para Google Auth nativo | Eliminar dependência paga; controle total dos JWTs e refresh tokens |
+| Ago/2026 | Validação de audience no Google Token | Segurança: impedir tokens de outros apps Google |

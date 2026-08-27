@@ -1,6 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '../utils/theme';
 import { ChildTabParamList } from './types';
 
@@ -11,18 +12,19 @@ import ChildStoreScreen from '../screens/child/ChildStoreScreen';
 const Tab = createBottomTabNavigator<ChildTabParamList>();
 
 export default function ChildNavigator() {
+  const insets = useSafeAreaInsets();
   return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarActiveTintColor: Colors.secondary,
-        tabBarInactiveTintColor: Colors.textLight,
-        tabBarStyle: {
-          backgroundColor: '#1A1A2E',
-          borderTopColor: '#2D2D4E',
-          paddingBottom: 4,
-          height: 60,
-        },
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          headerShown: false,
+          tabBarActiveTintColor: Colors.secondary,
+          tabBarInactiveTintColor: Colors.textLight,
+          tabBarStyle: {
+            backgroundColor: '#1A1A2E',
+            borderTopColor: '#2D2D4E',
+            paddingBottom: insets.bottom + 8,
+            height: 60 + insets.bottom,
+          },
         tabBarLabelStyle: { fontSize: 11, fontWeight: '700', color: '#fff' },
         tabBarIcon: ({ focused, color, size }) => {
           const icons: Record<string, keyof typeof Ionicons.glyphMap> = {

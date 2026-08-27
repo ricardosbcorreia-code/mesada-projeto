@@ -6,6 +6,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthContext } from '../store/AuthContext';
 import { Button } from '../components/ui';
+import { GoogleLoginButton } from '../components/auth/GoogleLoginButton';
 import { Colors, Spacing, Typography, BorderRadius } from '../utils/theme';
 import api from '../services/api';
 
@@ -137,6 +138,18 @@ export default function LoginScreen({ navigation }: Props) {
               variant={isParent ? 'primary' : 'secondary'}
               style={{ marginTop: Spacing.md }}
             />
+
+            {isParent && (
+              <>
+                <View style={styles.divider}>
+                  <View style={styles.dividerLine} />
+                  <Text style={styles.dividerText}>OU</Text>
+                  <View style={styles.dividerLine} />
+                </View>
+
+                <GoogleLoginButton />
+              </>
+            )}
           </View>
 
           {/* Register link — only for parents */}
@@ -190,4 +203,19 @@ const styles = StyleSheet.create({
   registerLink: { marginTop: Spacing.xl, alignItems: 'center' },
   registerText: { ...Typography.body, color: Colors.textSecondary },
   registerAction: { color: Colors.primary, fontWeight: '700' },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: Spacing.md,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.border,
+  },
+  dividerText: {
+    ...Typography.captionBold,
+    marginHorizontal: Spacing.sm,
+    color: Colors.textLight,
+  },
 });

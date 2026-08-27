@@ -2,7 +2,7 @@
   "expo": {
     "name": "Tarefa & Mesada",
     "slug": "appmesada",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "tarefamesada",
@@ -35,7 +35,10 @@
           "backgroundColor": "#4A90E2"
         }
       ],
-      "expo-notifications"
+      "expo-notifications",
+      "expo-secure-store",
+      "expo-web-browser",
+      "@react-native-google-signin/google-signin"
     ],
     "extra": {
       "eas": {

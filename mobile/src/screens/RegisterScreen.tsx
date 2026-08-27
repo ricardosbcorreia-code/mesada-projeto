@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../store/AuthContext';
 import { Button } from '../components/ui';
+import { GoogleLoginButton } from '../components/auth/GoogleLoginButton';
 import { Colors, Spacing, Typography, BorderRadius } from '../utils/theme';
 import api from '../services/api';
 
@@ -114,6 +115,14 @@ export default function RegisterScreen({ navigation }: Props) {
             style={{ marginTop: Spacing.lg }}
           />
 
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>OU</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          <GoogleLoginButton />
+
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.loginLink}>
             <Text style={styles.loginLinkText}>Já tem conta? <Text style={{ color: Colors.primary, fontWeight: '700' }}>Entrar</Text></Text>
           </TouchableOpacity>
@@ -152,4 +161,19 @@ const styles = StyleSheet.create({
   eyeIcon: { padding: 14 },
   loginLink: { marginTop: Spacing.xl, alignItems: 'center' },
   loginLinkText: { ...Typography.body, color: Colors.textSecondary },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: Spacing.lg,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.border,
+  },
+  dividerText: {
+    ...Typography.captionBold,
+    marginHorizontal: Spacing.sm,
+    color: Colors.textLight,
+  },
 });

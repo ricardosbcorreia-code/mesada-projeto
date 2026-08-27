@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.card, borderBottomWidth: 1, borderBottomColor: Colors.border,
   },
   headerTitle: { ...Typography.h2 },
-  scroll: { padding: Spacing.md, paddingBottom: Spacing.xxl },
+  scroll: { padding: Spacing.md, paddingBottom: 120 },
   childChip: {
     paddingHorizontal: Spacing.md, paddingVertical: 8, borderRadius: BorderRadius.full,
     borderWidth: 1, borderColor: Colors.border, backgroundColor: Colors.card,

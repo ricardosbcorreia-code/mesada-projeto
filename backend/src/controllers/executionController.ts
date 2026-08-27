@@ -5,7 +5,7 @@ import { sendPushNotification } from '../services/notificationService';
 
 // Helper to determine if a task should be executed today based on recurrence
 const shouldCreateExecution = (task: any, date: Date): boolean => {
-  const { recurrence_type, recurrence_interval, recurrence_days, recurrence_month, created_at } = task;
+  const { recurrence_type, recurrence_interval, recurrence_days, recurrence_month, created_at, type } = task;
   
   // Normalize dates to midnight for calculations
   const start = new Date(created_at);
@@ -16,6 +16,11 @@ const shouldCreateExecution = (task: any, date: Date): boolean => {
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
   
   if (diffDays < 0) return false; // Task hasn't started yet
+
+  // Penalidades e bônus não têm recorrência, executam apenas no dia em que foram criados
+  if (type === 'bonus' || type === 'penalty') {
+    return diffDays === 0;
+  }
 
   const interval = recurrence_interval || 1;
 

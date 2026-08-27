@@ -86,6 +86,35 @@ export default function ChecklistScreen() {
   const bonusTasks = executions.filter(e => e.assignment?.task?.type === 'bonus');
   const penaltyTasks = executions.filter(e => e.assignment?.task?.type === 'penalty' && e.status !== 'pending');
 
+  const ExpandableGroup = ({ title, items, renderItem }: { title: string; items: any[]; renderItem: (item: any) => React.ReactNode }) => {
+    const hasOpenItems = items.some(ex => ex.status === 'pending' || ex.status === 'completed');
+    const [expanded, setExpanded] = useState(hasOpenItems);
+
+    useEffect(() => {
+      setExpanded(hasOpenItems);
+    }, [hasOpenItems]);
+
+    if (items.length === 0) return null;
+
+    return (
+      <View style={{ marginBottom: Spacing.md }}>
+        <TouchableOpacity 
+          style={styles.groupHeader} 
+          onPress={() => setExpanded(!expanded)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.groupLabel}>{title}</Text>
+          <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={18} color={Colors.textSecondary} />
+        </TouchableOpacity>
+        {expanded && (
+          <View style={{ marginTop: Spacing.sm }}>
+            {items.map(renderItem)}
+          </View>
+        )}
+      </View>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       {/* Header */}
@@ -190,26 +219,9 @@ export default function ChecklistScreen() {
 
           return (
             <>
-              {mandatoryTasks.length > 0 && (
-                <View style={{ marginBottom: Spacing.md }}>
-                  <Text style={styles.sectionLabel}>⚠️ Obrigatórias</Text>
-                  {mandatoryTasks.map(renderTask)}
-                </View>
-              )}
-
-              {bonusTasks.length > 0 && (
-                <View style={{ marginBottom: Spacing.md }}>
-                  <Text style={styles.sectionLabel}>✨ Oportunidades (Bônus)</Text>
-                  {bonusTasks.map(renderTask)}
-                </View>
-              )}
-
-              {penaltyTasks.length > 0 && (
-                <View style={{ marginBottom: Spacing.md }}>
-                  <Text style={styles.sectionLabel}>🚫 Penalidades Aplicadas</Text>
-                  {penaltyTasks.map(renderTask)}
-                </View>
-              )}
+              <ExpandableGroup title="⚠️ Obrigatórias" items={mandatoryTasks} renderItem={renderTask} />
+              <ExpandableGroup title="✨ Oportunidades (Bônus)" items={bonusTasks} renderItem={renderTask} />
+              <ExpandableGroup title="🚫 Penalidades Aplicadas" items={penaltyTasks} renderItem={renderTask} />
             </>
           );
         })()}
@@ -232,8 +244,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10, paddingVertical: 4,
   },
   badgeText: { color: '#fff', fontSize: 12, fontWeight: '700' },
-  scroll: { padding: Spacing.md, paddingBottom: 100 },
-  sectionLabel: { color: Colors.textSecondary, fontSize: 13, fontWeight: '700', marginBottom: Spacing.sm, textTransform: 'uppercase', letterSpacing: 0.5 },
+  scroll: { padding: Spacing.md, paddingBottom: 120 },
+  groupHeader: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingVertical: 10, paddingHorizontal: 12, backgroundColor: '#16213E',
+    borderRadius: BorderRadius.md,
+  },
+  groupLabel: { color: Colors.textSecondary, fontSize: 13, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
   taskCard: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: '#16213E',

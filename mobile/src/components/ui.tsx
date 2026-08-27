@@ -1,11 +1,11 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, ViewStyle, TextStyle, StyleProp } from 'react-native';
 import { Colors, BorderRadius, Spacing, Typography } from '../utils/theme';
 
 // ── Card ──────────────────────────────────────────────────────────────────────
 interface CardProps {
   children: React.ReactNode;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 }
 export const Card = ({ children, style }: CardProps) => (
   <View style={[styles.card, style]}>{children}</View>
@@ -18,8 +18,8 @@ interface ButtonProps {
   variant?: 'primary' | 'secondary' | 'danger' | 'outline';
   loading?: boolean;
   disabled?: boolean;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
   small?: boolean;
 }
 export const Button = ({ title, onPress, variant = 'primary', loading, disabled, style, textStyle, small }: ButtonProps) => {
@@ -73,7 +73,7 @@ export const Badge = ({ label, color = Colors.primary, textColor = '#fff' }: Bad
 interface ProgressBarProps {
   progress: number; // 0 to 1
   color?: string;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   height?: number;
 }
 export const ProgressBar = ({ progress, color = Colors.primary, style, height = 10 }: ProgressBarProps) => {

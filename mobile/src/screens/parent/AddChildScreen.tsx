@@ -13,7 +13,7 @@ interface Props {
   navigation: any;
 }
 
-const PIN_EMOJIS = ['🦁', '🐯', '🐼', '🦊', '🐸', '🦄', '🐉', '🦋'];
+const PIN_EMOJIS = ['🦁', '🐯', '🐼', '🦊', '🐸', '🦄', '🦋', '🐶', '🤖', '🐱', '🐰'];
 
 export default function AddChildScreen({ navigation }: Props) {
   const [name, setName] = useState('');

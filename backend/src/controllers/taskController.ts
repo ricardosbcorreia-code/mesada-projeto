@@ -195,3 +195,38 @@ export const updateTask = async (req: AuthenticatedRequest, res: Response): Prom
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+export const deleteTask = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const parentId = req.user?.id;
+    const taskId = req.params.id as string;
+
+    if (!parentId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const existingTask = await prisma.task.findUnique({
+      where: { id: taskId }
+    });
+
+    if (!existingTask || existingTask.parent_id !== parentId) {
+      res.status(404).json({ error: 'Task not found' });
+      return;
+    }
+
+    // Delete task (cascading deletes will handle subtasks and assignments if set up in schema,
+    // otherwise we must delete them manually - but prisma schema typically uses onDelete: Cascade)
+    // To be safe and explicit:
+    await prisma.$transaction(async (tx) => {
+      await tx.taskAssignment.deleteMany({ where: { task_id: taskId } });
+      await tx.subTask.deleteMany({ where: { task_id: taskId } });
+      await tx.task.delete({ where: { id: taskId } });
+    });
+
+    res.status(200).json({ message: 'Task deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};

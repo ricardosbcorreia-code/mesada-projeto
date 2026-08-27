@@ -60,13 +60,13 @@ export const updateChildSchema = createChildSchema.partial();
 export const createTaskSchema = z.object({
   name: z.string().min(2, 'Nome da tarefa deve ter pelo menos 2 caracteres'),
   description: z.string().optional(),
-  type: z.enum(['SIMPLE', 'CHECKLIST']),
+  type: z.enum(['mandatory', 'bonus', 'penalty']),
   value: z.number().nonnegative('Valor não pode ser negativo'),
   childIds: z.array(z.string().uuid()).optional(),
   subtasks: z.array(z.string()).optional(),
-  recurrence_type: z.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'CUSTOM']),
+  recurrence_type: z.enum(['daily', 'weekly', 'monthly', 'yearly']),
   recurrence_interval: z.number().int().min(1).optional().default(1),
-  recurrence_days: z.array(z.number().min(0).max(6)).optional(),
+  recurrence_days: z.array(z.number().min(0).max(31)).optional(),
   recurrence_month: z.number().min(1).max(31).nullable().optional(),
 });
 

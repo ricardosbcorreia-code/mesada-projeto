@@ -2,6 +2,9 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../utils/config';
 
+// Agora apenas mantemos isso para retrocompatibilidade caso algo puxe de setClerkTokenGetter temporariamente (removemos na prática)
+export const setClerkTokenGetter = (getter: () => Promise<string | null>) => {};
+
 const api = axios.create({
   baseURL: API_URL,
 });
@@ -9,6 +12,7 @@ const api = axios.create({
 api.interceptors.request.use(
   async (config) => {
     const token = await AsyncStorage.getItem('@auth_token');
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -33,7 +37,7 @@ api.interceptors.response.use(
           throw new Error('No refresh token available');
         }
 
-        // Tenta renovar o token
+        // Tenta renovar o token da (Criança e Pai usam o mesmo fluxo agora)
         const response = await axios.post(`${API_URL}/auth/refresh`, { refreshToken });
         const { accessToken, refreshToken: newRefreshToken } = response.data;
 
@@ -45,7 +49,7 @@ api.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
-        // Se falhar o refresh, limpa tudo e desloga
+        // Se falhar o refresh, desloga
         await AsyncStorage.multiRemove([
           '@auth_token', 
           '@auth_refresh_token', 
@@ -53,9 +57,6 @@ api.interceptors.response.use(
           '@auth_role'
         ]);
         
-        if (typeof window !== 'undefined') {
-          window.location.reload();
-        }
         return Promise.reject(refreshError);
       }
     }

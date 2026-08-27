@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 
 if (!JWT_SECRET) {
   throw new Error('FATAL: JWT_SECRET environment variable is not defined.');
@@ -13,10 +12,11 @@ export interface AuthenticatedRequest extends Request {
     id: string;
     role: 'parent' | 'child';
     parent_id?: string;
+    google_id?: string;
   };
 }
 
-export const authenticate = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+export const authenticate = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -27,9 +27,9 @@ export const authenticate = (req: AuthenticatedRequest, res: Response, next: Nex
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as AuthenticatedRequest['user'];
+    const decoded = jwt.verify(token, JWT_SECRET as string) as AuthenticatedRequest['user'];
     req.user = decoded;
-    next();
+    return next();
   } catch (err) {
     res.status(401).json({ error: 'Unauthorized: Invalid token' });
   }

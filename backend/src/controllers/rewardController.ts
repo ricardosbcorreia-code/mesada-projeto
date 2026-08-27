@@ -74,6 +74,41 @@ export const createReward = async (req: AuthenticatedRequest, res: Response): Pr
   }
 };
 
+// PUT /api/rewards/:id (Parent only)
+export const updateReward = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    if (req.user?.role !== 'parent') {
+      res.status(403).json({ error: 'Only parents can edit rewards' });
+      return;
+    }
+
+    const parentId = req.user.id;
+    const rewardId = req.params.id as string;
+    const { name, description, cost_in_xp, max_redeems } = req.body;
+
+    const reward = await prisma.reward.findUnique({ where: { id: rewardId } });
+    if (!reward || reward.parent_id !== parentId) {
+      res.status(404).json({ error: 'Reward not found or unauthorized' });
+      return;
+    }
+
+    const updated = await prisma.reward.update({
+      where: { id: rewardId },
+      data: {
+        name,
+        description,
+        cost_in_xp: cost_in_xp !== undefined ? Number(cost_in_xp) : undefined,
+        max_redeems: max_redeems !== undefined ? (max_redeems ? Number(max_redeems) : null) : undefined,
+      }
+    });
+
+    res.json(updated);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
 // DELETE /api/rewards/:id (Parent only)
 export const deleteReward = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {

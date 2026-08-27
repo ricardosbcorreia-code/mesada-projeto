@@ -14,7 +14,7 @@ Permite que pais criem tarefas, atribuam a filhos, acompanhem a execução e cal
 | **Backend** | Node.js + Express + TypeScript |
 | **ORM** | Prisma |
 | **Banco de Dados** | PostgreSQL (Supabase) |
-| **Autenticação** | JWT |
+| **Autenticação** | JWT + Clerk (Social Login/Google) |
 | **Notificações** | Expo Push Notifications |
 | **Build Mobile** | EAS Build (Expo Application Services) |
 | **Deploy Backend** | Render.com |
@@ -64,7 +64,11 @@ Veja `backend/.env.example` para a lista completa.
 | Variável | Descrição |
 |---|---|
 | `DATABASE_URL` | String de conexão do PostgreSQL (Supabase) |
-| `JWT_SECRET` | Chave secreta para geração de tokens JWT |
+| `JWT_SECRET` | Chave secreta para geração de tokens JWT (PIN login) |
+| `CLERK_PUBLISHABLE_KEY` | Chave pública do Clerk (Backend) |
+| `CLERK_SECRET_KEY` | Chave secreta do Clerk (Backend) |
+| `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` | Chave pública do Clerk (Mobile) |
+| `EXPO_PUBLIC_API_URL` | URL da API (Local: http://localhost:3000/api) |
 
 ## Scripts Úteis
 

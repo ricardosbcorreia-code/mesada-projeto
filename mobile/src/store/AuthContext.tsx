@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { setClerkTokenGetter } from '../services/api';
 
 type UserRole = 'parent' | 'child' | null;
 
@@ -26,14 +27,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [role, setRole] = useState<UserRole>(null);
   const [loading, setLoading] = useState(true);
 
+  // Nós configuramos o axios no api.ts para pegar o token direto.
+  // Vamos configurar o setClerkTokenGetter para pegar do AsyncStorage em vez do Clerk
+  useEffect(() => {
+    setClerkTokenGetter(async () => {
+      const token = await AsyncStorage.getItem('@auth_token');
+      return token;
+    });
+  }, []);
+
+  // Carregar dados iniciais 
   useEffect(() => {
     async function loadStorageData() {
       const storageUser = await AsyncStorage.getItem('@auth_user');
       const storageRole = await AsyncStorage.getItem('@auth_role');
       const storageToken = await AsyncStorage.getItem('@auth_token');
-      const storageRefreshToken = await AsyncStorage.getItem('@auth_refresh_token');
 
-      if (storageUser && storageRole && storageToken && storageRefreshToken) {
+      if (storageUser && storageRole && storageToken) {
         setUser(JSON.parse(storageUser));
         setRole(storageRole as UserRole);
       }

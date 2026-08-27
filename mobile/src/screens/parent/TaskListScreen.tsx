@@ -162,6 +162,30 @@ export default function TaskListScreen() {
     }
   };
 
+  const handleDeleteTask = (taskId: string) => {
+    Alert.alert(
+      'Excluir Tarefa',
+      'Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser desfeita.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { 
+          text: 'Excluir', 
+          style: 'destructive',
+          onPress: async () => {
+            setLoading(true);
+            try {
+              await api.delete(`/tasks/${taskId}`);
+              loadData();
+            } catch (error: any) {
+              showAlert('Erro', error.response?.data?.error || 'Erro ao excluir tarefa.');
+              setLoading(false);
+            }
+          }
+        }
+      ]
+    );
+  };
+
   const toggleChild = (id: string) => {
     setSelectedChildIds(prev => prev.includes(id) ? prev.filter(cId => cId !== id) : [...prev, id]);
   };
@@ -230,9 +254,14 @@ export default function TaskListScreen() {
                     </View>
                   )}
                 </View>
-                <TouchableOpacity onPress={() => openEditModal(task)} style={{ padding: 8 }}>
-                  <Ionicons name="create-outline" size={22} color={Colors.textSecondary} />
-                </TouchableOpacity>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <TouchableOpacity onPress={() => openEditModal(task)} style={{ padding: 8 }}>
+                    <Ionicons name="create-outline" size={22} color={Colors.textSecondary} />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => handleDeleteTask(task.id)} style={{ padding: 8 }}>
+                    <Ionicons name="trash-outline" size={22} color={Colors.danger} />
+                  </TouchableOpacity>
+                </View>
               </View>
             </Card>
           ))
@@ -486,7 +515,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary, width: 36, height: 36, borderRadius: 18,
     alignItems: 'center', justifyContent: 'center',
   },
-  scroll: { padding: Spacing.md, paddingBottom: 100 }, // Added padding for bottom bar
+  scroll: { padding: Spacing.md, paddingBottom: 120 }, // Added padding for bottom bar
   taskRow: { flexDirection: 'row', alignItems: 'flex-start' },
   taskTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 4 },
   taskName: { ...Typography.bodyBold, flex: 1 },

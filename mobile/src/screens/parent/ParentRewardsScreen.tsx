@@ -22,6 +22,7 @@ export default function ParentRewardsScreen() {
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [editingRewardId, setEditingRewardId] = useState<string | null>(null);
   
   // Form State
   const [name, setName] = useState('');
@@ -43,19 +44,36 @@ export default function ParentRewardsScreen() {
 
   useEffect(() => { fetchRewards(); }, [fetchRewards]);
 
+  const handleEdit = (reward: Reward) => {
+    setEditingRewardId(reward.id);
+    setName(reward.name);
+    setDescription(reward.description || '');
+    setCostInXp(reward.cost_in_xp.toString());
+    setMaxRedeems(reward.max_redeems ? reward.max_redeems.toString() : '');
+    setShowForm(true);
+  };
+
   const handleCreate = async () => {
     if (!name || !costInXp) {
       Alert.alert('Erro', 'Preencha o nome e o custo em XP.');
       return;
     }
     try {
-      await api.post('/rewards', {
+      const payload = {
         name,
         description,
         cost_in_xp: parseInt(costInXp, 10),
         max_redeems: maxRedeems ? parseInt(maxRedeems, 10) : null
-      });
+      };
+
+      if (editingRewardId) {
+        await api.put(`/rewards/${editingRewardId}`, payload);
+      } else {
+        await api.post('/rewards', payload);
+      }
+      
       setShowForm(false);
+      setEditingRewardId(null);
       setName('');
       setDescription('');
       setCostInXp('');
@@ -97,7 +115,15 @@ export default function ParentRewardsScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Loja de Prêmios</Text>
-        <TouchableOpacity onPress={() => setShowForm(!showForm)}>
+        <TouchableOpacity onPress={() => {
+          if (showForm) {
+            setShowForm(false);
+            setEditingRewardId(null);
+            setName(''); setDescription(''); setCostInXp(''); setMaxRedeems('');
+          } else {
+            setShowForm(true);
+          }
+        }}>
           <Ionicons name={showForm ? 'close' : 'add'} size={28} color={Colors.primary} />
         </TouchableOpacity>
       </View>
@@ -108,7 +134,7 @@ export default function ParentRewardsScreen() {
       >
         {showForm && (
           <Card style={styles.formCard}>
-            <Text style={styles.formTitle}>Novo Prêmio</Text>
+            <Text style={styles.formTitle}>{editingRewardId ? 'Editar Prêmio' : 'Novo Prêmio'}</Text>
             
             <Text style={styles.label}>Nome do Prêmio *</Text>
             <TextInput
@@ -135,7 +161,16 @@ export default function ParentRewardsScreen() {
               onChangeText={setDescription}
             />
 
-            <Button title="Salvar Prêmio" onPress={handleCreate} />
+            <Text style={styles.label}>Limite de Resgates (Opcional)</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ex: 1 (Para resgate único no mês)"
+              keyboardType="numeric"
+              value={maxRedeems}
+              onChangeText={setMaxRedeems}
+            />
+
+            <Button title={editingRewardId ? "Salvar Alterações" : "Salvar Prêmio"} onPress={handleCreate} />
           </Card>
         )}
 
@@ -188,11 +223,16 @@ export default function ParentRewardsScreen() {
               </View>
               <View style={styles.rewardFooter}>
                 <Text style={styles.rewardStats}>
-                  {reward.redemptions?.length || 0} resgates
+                  {reward.redemptions?.length || 0} resgates{reward.max_redeems ? ` (Limite: ${reward.max_redeems})` : ''}
                 </Text>
-                <TouchableOpacity onPress={() => handleDelete(reward.id, reward.name)}>
-                  <Ionicons name="trash-outline" size={20} color={Colors.danger} />
-                </TouchableOpacity>
+                <View style={{ flexDirection: 'row', gap: 12 }}>
+                  <TouchableOpacity onPress={() => handleEdit(reward)}>
+                    <Ionicons name="pencil-outline" size={20} color={Colors.primary} />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => handleDelete(reward.id, reward.name)}>
+                    <Ionicons name="trash-outline" size={20} color={Colors.danger} />
+                  </TouchableOpacity>
+                </View>
               </View>
             </Card>
           ))
@@ -210,7 +250,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.card, borderBottomWidth: 1, borderBottomColor: Colors.border,
   },
   headerTitle: { ...Typography.h2 },
-  scroll: { padding: Spacing.md, paddingBottom: Spacing.xxl },
+  scroll: { padding: Spacing.md, paddingBottom: 120 },
   formCard: { marginBottom: Spacing.lg, backgroundColor: Colors.card, borderColor: Colors.primary, borderWidth: 1 },
   formTitle: { ...Typography.h3, marginBottom: Spacing.md },
   label: { ...Typography.captionBold, color: Colors.textSecondary, marginBottom: 4 },
