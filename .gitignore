@@ -49,5 +49,6 @@ Thumbs.db
 # Debug/temp scripts
 backend/check*.js
 mobile/errors.txt
-*.log
-log.json
+# Local security backups
+docs/security/ENV_KEYS.md
+
