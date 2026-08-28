@@ -1,10 +1,29 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const getResendClient = (): Resend | null => {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey || apiKey.trim() === '') {
+    return null;
+  }
+  try {
+    return new Resend(apiKey);
+  } catch (err) {
+    console.error('[EmailService] Erro ao inicializar SDK Resend:', err);
+    return null;
+  }
+};
 
 const FROM_EMAIL = process.env.EMAIL_FROM || 'Tarefa & Mesada <noreply@tarefamesada.app>';
 
 export const sendPasswordResetEmail = async (to: string, name: string, code: string): Promise<void> => {
+  const resend = getResendClient();
+
+  if (!resend) {
+    console.warn(`[EmailService] ⚠️ RESEND_API_KEY não configurada! Código de recuperação para ${to} (${name}): [ ${code} ]`);
+    // Em dev/teste sem chave Resend, registra no console sem quebrar a aplicação
+    return;
+  }
+
   const { error } = await resend.emails.send({
     from: FROM_EMAIL,
     to,
@@ -72,3 +91,4 @@ export const sendPasswordResetEmail = async (to: string, name: string, code: str
     throw new Error('Falha ao enviar e-mail de recuperação.');
   }
 };
+
