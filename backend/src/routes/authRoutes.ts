@@ -4,22 +4,7 @@ import { authenticate } from '../middlewares/auth';
 import { authLimiter, refreshLimiter } from '../middlewares/rateLimiter';
 import { validate, registerParentSchema, loginParentSchema, loginChildSchema, refreshTokenSchema, forgotPasswordSchema, resetPasswordSchema } from '../middlewares/validators';
 
-import prisma from '../config/prisma';
-
 const router = express.Router();
-
-router.get('/run-migration-temp', async (req, res) => {
-  try {
-    await prisma.$executeRawUnsafe(`
-      ALTER TABLE "parents"
-      ADD COLUMN IF NOT EXISTS "reset_code" TEXT,
-      ADD COLUMN IF NOT EXISTS "reset_code_expires" TIMESTAMPTZ;
-    `);
-    res.json({ success: true, message: "Migration completed successfully!" });
-  } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
 
 router.post('/register', authLimiter, validate(registerParentSchema), registerParent);
 router.post('/login', authLimiter, validate(loginParentSchema), loginParent);
