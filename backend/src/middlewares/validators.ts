@@ -34,6 +34,16 @@ export const loginParentSchema = z.object({
   password: z.string().min(1, 'Senha é obrigatória'),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email('Email inválido'),
+});
+
+export const resetPasswordSchema = z.object({
+  email: z.string().email('Email inválido'),
+  code: z.string().length(6, 'Código deve ter 6 dígitos'),
+  newPassword: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
+});
+
 export const loginChildSchema = z.object({
   parentEmail: z.string().email('Email do responsável inválido'),
   pin: z.string().regex(/^\d{4}$/, 'PIN deve ter exatamente 4 dígitos'),

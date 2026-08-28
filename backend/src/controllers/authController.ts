@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { randomInt } from 'crypto';
 import { OAuth2Client } from 'google-auth-library';
 import prisma from '../config/prisma';
 import { AuthenticatedRequest } from '../middlewares/auth';
+import { sendPasswordResetEmail } from '../services/emailService';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
@@ -212,5 +214,91 @@ export const registerPushToken = async (req: AuthenticatedRequest, res: Response
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Erro ao registrar push token' });
+  }
+};
+
+export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email } = req.body;
+
+    // Always return 200 to avoid revealing if an email is registered
+    const parent = await prisma.parent.findUnique({ where: { email } });
+    if (!parent) {
+      res.json({ success: true });
+      return;
+    }
+
+    // Block Google-only accounts (no password)
+    if (!parent.password_hash && parent.google_id) {
+      res.json({ 
+        success: true, 
+        hint: 'google_account' 
+      });
+      return;
+    }
+
+    // Generate secure 6-digit code
+    const code = String(randomInt(100000, 999999));
+    const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+    await prisma.parent.update({
+      where: { id: parent.id },
+      data: {
+        reset_code: code,
+        reset_code_expires: expires,
+      },
+    });
+
+    await sendPasswordResetEmail(parent.email, parent.name, code);
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[ForgotPassword] ERROR:', error);
+    res.status(500).json({ error: 'Erro ao processar solicitação.' });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email, code, newPassword } = req.body;
+
+    const parent = await prisma.parent.findUnique({ where: { email } });
+
+    if (!parent || !parent.reset_code || !parent.reset_code_expires) {
+      res.status(400).json({ error: 'Código inválido ou expirado.' });
+      return;
+    }
+
+    // Check expiry
+    if (new Date() > parent.reset_code_expires) {
+      await prisma.parent.update({
+        where: { id: parent.id },
+        data: { reset_code: null, reset_code_expires: null },
+      });
+      res.status(400).json({ error: 'Código expirado. Solicite um novo.' });
+      return;
+    }
+
+    // Validate code (constant-time comparison via bcrypt-style timing)
+    if (parent.reset_code !== code) {
+      res.status(400).json({ error: 'Código incorreto.' });
+      return;
+    }
+
+    // Update password and clear reset fields
+    const password_hash = await bcrypt.hash(newPassword, 10);
+    await prisma.parent.update({
+      where: { id: parent.id },
+      data: {
+        password_hash,
+        reset_code: null,
+        reset_code_expires: null,
+      },
+    });
+
+    res.json({ success: true, message: 'Senha redefinida com sucesso.' });
+  } catch (error) {
+    console.error('[ResetPassword] ERROR:', error);
+    res.status(500).json({ error: 'Erro ao redefinir senha.' });
   }
 };

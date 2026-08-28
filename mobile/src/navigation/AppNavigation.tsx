@@ -7,6 +7,8 @@ import { AuthContext } from '../store/AuthContext';
 import { RootStackParamList } from './types';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
+import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
+import ResetPasswordScreen from '../screens/ResetPasswordScreen';
 import ParentStack from './ParentStack';
 import ChildNavigator from './ChildNavigator';
 import { Colors } from '../utils/theme';
@@ -33,6 +35,8 @@ export default function AppNavigation() {
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+            <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
           </>
         ) : role === 'parent' ? (
           <Stack.Screen name="ParentTabs" component={ParentStack} />

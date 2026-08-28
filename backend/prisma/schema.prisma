@@ -8,16 +8,18 @@ datasource db {
 }
 
 model Parent {
-  id              String   @id @default(uuid())
-  name            String
-  email           String   @unique
-  password_hash   String?
-  google_id       String?  @unique
-  expo_push_token String?
-  created_at      DateTime @default(now())
-  children        Child[]
-  rewards         Reward[]
-  tasks           Task[]
+  id                   String    @id @default(uuid())
+  name                 String
+  email                String    @unique
+  password_hash        String?
+  google_id            String?   @unique
+  expo_push_token      String?
+  reset_code           String?
+  reset_code_expires   DateTime?
+  created_at           DateTime  @default(now())
+  children             Child[]
+  rewards              Reward[]
+  tasks                Task[]
 
   @@map("parents")
 }

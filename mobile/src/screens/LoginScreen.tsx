@@ -104,6 +104,12 @@ export default function LoginScreen({ navigation }: Props) {
                   onChangeText={setPassword}
                   secureTextEntry
                 />
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('ForgotPassword')}
+                  style={styles.forgotLink}
+                >
+                  <Text style={styles.forgotText}>Esqueci minha senha</Text>
+                </TouchableOpacity>
               </>
             ) : (
               <>
@@ -218,4 +224,6 @@ const styles = StyleSheet.create({
     marginHorizontal: Spacing.sm,
     color: Colors.textLight,
   },
+  forgotLink: { alignSelf: 'flex-end', marginTop: 8 },
+  forgotText: { ...Typography.caption, color: Colors.primary, fontWeight: '600' },
 });
